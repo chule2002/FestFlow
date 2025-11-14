@@ -24,26 +24,25 @@ export default async function Home() {
 
       <ul className="space-y-3">
         {safeTrucks.map((t) => (
-          <li
-            key={t.id}
-            className="border rounded-xl p-4 flex items-center justify-between"
-          >
-            <div>
-              <div className="font-semibold">{t.display_name}</div>
-              <div className="text-sm text-slate-500">
-                {(t.cuisines || []).join(', ') || 'Sin categoría'}
-              </div>
-            </div>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                t.is_open
-                  ? 'bg-green-200 text-green-800'
-                  : 'bg-red-200 text-red-800'
-              }`}
-            >
-              {t.is_open ? 'Abierto' : 'Cerrado'}
-            </span>
-          </li>
+<li
+  key={t.id}
+  className="border rounded-xl p-4 flex items-center justify-between"
+>
+  <div>
+    <div className="font-semibold">{t.display_name}</div>
+    <div className="text-sm text-slate-500">
+      {(t.cuisines || []).join(', ') || 'Sin categoría'}
+    </div>
+  </div>
+
+  <a
+    href={`/truck/${t.id}`}
+    className="text-sm text-blue-600 underline"
+  >
+    Ver menú →
+  </a>
+</li>
+
         ))}
       </ul>
     </main>
