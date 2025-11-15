@@ -20,12 +20,13 @@ type MenuItem = {
 }
 
 export default function TruckPage() {
-  const { id } = useParams() as { id?: string }
-  const truckId = id ?? ''
+  const params = useParams() as { id?: string | string[] }
+  const truckId = Array.isArray(params.id) ? params.id?.[0] ?? '' : params.id ?? ''
 
   const [truck, setTruck] = useState<Truck | null>(null)
   const [items, setItems] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [creatingId, setCreatingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!truckId) return
@@ -53,6 +54,38 @@ export default function TruckPage() {
 
     load()
   }, [truckId])
+
+  const handleOrderClick = async (item: MenuItem) => {
+    if (!truckId || !item.id) return
+
+    try {
+      setCreatingId(item.id)
+
+      const res = await fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          truck_id: truckId,
+          item_id: item.id,
+          item_name: item.name,
+          price_cents: item.price_cents ?? 0
+        })
+      })
+
+      if (!res.ok) {
+        console.error(await res.text())
+        alert('Error al crear el pedido (demo)')
+        return
+      }
+
+      alert('Pedido creado (demo)')
+    } catch (e) {
+      console.error(e)
+      alert('Error al crear el pedido (demo)')
+    } finally {
+      setCreatingId(null)
+    }
+  }
 
   if (!truckId) {
     return (
@@ -114,8 +147,12 @@ export default function TruckPage() {
                   <div className="font-semibold">
                     CHF {(((item.price_cents ?? 0) as number) / 100).toFixed(2)}
                   </div>
-                  <button className="mt-2 px-3 py-1 rounded-full text-xs bg-black text-white">
-                    Pedir (demo)
+                  <button
+                    onClick={() => handleOrderClick(item)}
+                    disabled={creatingId === item.id}
+                    className="mt-2 px-3 py-1 rounded-full text-xs bg-black text-white disabled:opacity-60"
+                  >
+                    {creatingId === item.id ? 'Creando…' : 'Pedir (demo)'}
                   </button>
                 </div>
               </li>
@@ -126,3 +163,4 @@ export default function TruckPage() {
     </main>
   )
 }
+
